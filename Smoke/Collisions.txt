@@ -1,0 +1,28 @@
+﻿
+https://web.archive.org/web/20191208231225/https://wildbunny.co.uk/blog/2011/12/14/how-to-make-a-2d-platform-game-part-2-collision-detection/
+
+-- What I like:
+. Only applies to objects in motion.
+. Draw a box from where it is now, to where it will be in the next frame.
+	. Get a list of objects within that box
+	. Then I need to think about it... maybe a quadtree along the vector?
+	. Or distnace based?
+
+. Rotated rectangle - AABB box
+	(i.e. find the 4 points)
+
+Then I can consider a more refined collision technique:
+	- Pixel based (XOR)
+	- Point Based (ala https://www.codeandweb.com/physicseditor)
+
+
+More research:
+	Quad Tree Collision
+	Polygon in Monogame
+
+
+Seems to have code to determine if two vectors will intercept
+https://community.monogame.net/t/why-rotate-a-sprite-is-simple-and-rotate-a-rectangle-is-damn-complex/7694/14
+
+Cool library (and screenshot!)
+https://github.com/tainicom/Aether.Physics2D

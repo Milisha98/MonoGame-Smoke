@@ -1,0 +1,32 @@
+﻿                                                                                                                                        
+                                                                                                                                        
+      xxxxxxx/                                                                                                                          
+      x     x>                                                                                                                         
+      x     xxx/                                                                                                                      
+      x       x>                                                                                                                        
+      x   xxxxx>                                                                                                                        
+      x   x*VVV\                                                                                                                        
+      xxxxx>                                                                                                                            
+      /VVVV\                                                                                                                            
+                                                                                                                                        
+                                                                                                                                        
+Rules:
+/   if (0, -1) is floor & (1, 0) is floor then (1, 0) is /
+
+
+>	if (0, -1) is wall & (1, 0) is floor then (1, 0) is >
+
+    *#.
+    *#.
+    ***
+
+
+V   if (-1, 0) is wall & (0, 1) is floor then (0, 1) is V
+
+    ***
+    ##*
+    ..*
+
+
+\   if (0, 1) is floor & (1, 1) is floor and (1, 0) is floor then \
+
