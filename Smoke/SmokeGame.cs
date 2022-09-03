@@ -8,10 +8,13 @@ using System.Collections.Generic;
 namespace Smoke;
 
 public class SmokeGame : Game
-{
+{ 
     const int ScreenWidth = 2560;
     const int ScreenHeight = 1440;
     const int TileWidth = 32, TileHeight = 32;
+
+    private RenderTarget2D _renderTarget;
+    float _scale = 1f;
 
     private GraphicsDeviceManager _graphics;
     private SpriteBatch _spriteBatch;
@@ -62,6 +65,7 @@ public class SmokeGame : Game
 
     protected override void LoadContent()
     {
+        _renderTarget = new RenderTarget2D(GraphicsDevice, ScreenWidth, ScreenHeight);
         _spriteBatch = new SpriteBatch(GraphicsDevice);
 
         // Tiles
@@ -77,13 +81,9 @@ public class SmokeGame : Game
 
         _debugText = Content.Load<SpriteFont>("Text");
 
-        _rocketScreenPosition = new Vector2((GraphicsDevice.Viewport.Width / 2) - (_rocket.Width / 2),
-                                           (GraphicsDevice.Viewport.Height / 2) - (_rocket.Height / 2));
+        _rocketScreenPosition = new Vector2(640 - (_rocket.Width / 2), 360 - (_rocket.Height / 2));
 
         _rocketMapPosition = new Vector2((_mapData.Rows / 2) * TileWidth, (_mapData.Columns / 2) * TileHeight);
-
-        _viewPortMapTopLeft = _rocketMapPosition - new Vector2(ScreenWidth / 2, ScreenHeight / 2);
-        _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(ScreenWidth, ScreenHeight));
 
         _smokeEmitterMapPosition = new Vector2(_smoke.Width / 2, _smoke.Height / 2) + 
                                    new Vector2(_rocket.Width / 2, _rocket.Height);
@@ -125,8 +125,8 @@ public class SmokeGame : Game
         var relativePos = new Vector2(deltaX * _rocketVelocity, deltaY * _rocketVelocity);
         _rocketMapPosition += relativePos;
 
-        _viewPortMapTopLeft = _rocketMapPosition - new Vector2(ScreenWidth / 2, ScreenHeight / 2);
-        _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(ScreenWidth, ScreenHeight));
+        _viewPortMapTopLeft = _rocketMapPosition - new Vector2(640, 360);
+        _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(1280, 720));
 
         _tileOffset = new Vector2(_viewPortMapTopLeft.X % TileWidth, _viewPortMapTopLeft.Y % TileHeight);       // Tile offset adjusts the tile-map to keep things smooth.
 
@@ -159,9 +159,11 @@ public class SmokeGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
+        _scale = 1f / (720f / GraphicsDevice.Viewport.Height);
+        GraphicsDevice.SetRenderTarget(_renderTarget);
         GraphicsDevice.Clear(Color.Black);
-
-        // TODO: Add your drawing code here
+        
+        // == Draw to the Back-Buffer ==
         _spriteBatch.Begin();
 
         // Draw the background
@@ -169,21 +171,29 @@ public class SmokeGame : Game
 
         // Draw the Rocket
         var shadowOffset = new Vector2(25, 50);
-        DrawRotated(_spriteBatch, _rocketShadow, _rocketScreenPosition + shadowOffset, _rocketAngle);
-        DrawRotated(_spriteBatch, _rocket, _rocketScreenPosition, _rocketAngle);
+        DrawRotatedAndScale(_spriteBatch, _rocketShadow, _rocketScreenPosition + shadowOffset, _rocketAngle, 0.7f, Color.White);
+        DrawRotatedAndScale(_spriteBatch, _rocket, _rocketScreenPosition, _rocketAngle, 0.7f, Color.White);
 
         // Draw the Smoke
-        var position = MapPositionToScreenPosition(_smokeEmitterMapPosition);
-        //DrawRotatedAndScale(_spriteBatch, _smoke, position.Value, _rocketAngle, 0.2f);
+        var position = MapPositionToScreenPosition(_smokeEmitterMapPosition);        
         foreach (var smoke in _smokeParticles)
         {
             if (smoke.ScreenPosition == null) continue;
-            DrawRotatedAndScale(_spriteBatch, _smoke, smoke.ScreenPosition.Value, smoke.Angle, smoke.Scale, smoke.TintColor);
+            DrawRotatedAndScale(_spriteBatch, _smoke, smoke.ScreenPosition.Value, smoke.Angle, smoke.Scale * 0.8f, smoke.TintColor);
         }
 
         // Debug
         //_spriteBatch.DrawString(_debugText, $"{offsetString}", new Vector2(0, 0), Color.White);
 
+        _spriteBatch.End();
+
+
+        // Display the Back-Buffer to the screen with a scale
+        GraphicsDevice.SetRenderTarget(null);
+        GraphicsDevice.Clear(Color.Black);
+
+        _spriteBatch.Begin();
+        _spriteBatch.Draw(_renderTarget, Vector2.Zero, null, Color.White, 0f, Vector2.Zero, _scale, SpriteEffects.None, 0f);
         _spriteBatch.End();
 
         base.Draw(gameTime);
