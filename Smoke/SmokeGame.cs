@@ -11,6 +11,13 @@ public class SmokeGame : Game
 { 
     const int ScreenWidth = 2560;
     const int ScreenHeight = 1440;
+
+    const int RenderWidth = 1280;
+    const int RenderHeight = 720;
+    //const int RenderWidth = 1600;
+    //const int RenderHeight = 900;
+
+
     const int TileWidth = 32, TileHeight = 32;
 
     private RenderTarget2D _renderTarget;
@@ -34,7 +41,7 @@ public class SmokeGame : Game
     private float _rocketAngle = 0;
 
     // Smoke
-    private Vector2 _smokeEmitterMapPosition, _smokeEmitterScreenPosition;
+    private Vector2 _smokeEmitterMapPosition;
     private List<Smoke> _smokeParticles;
 
     private Vector2 _viewPortMapTopLeft;
@@ -81,7 +88,7 @@ public class SmokeGame : Game
 
         _debugText = Content.Load<SpriteFont>("Text");
 
-        _rocketScreenPosition = new Vector2(640 - (_rocket.Width / 2), 360 - (_rocket.Height / 2));
+        _rocketScreenPosition = new Vector2((RenderWidth / 2) - (_rocket.Width / 2), (RenderHeight / 2) - (_rocket.Height / 2));
 
         _rocketMapPosition = new Vector2((_mapData.Rows / 2) * TileWidth, (_mapData.Columns / 2) * TileHeight);
 
@@ -125,8 +132,8 @@ public class SmokeGame : Game
         var relativePos = new Vector2(deltaX * _rocketVelocity, deltaY * _rocketVelocity);
         _rocketMapPosition += relativePos;
 
-        _viewPortMapTopLeft = _rocketMapPosition - new Vector2(640, 360);
-        _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(1280, 720));
+        _viewPortMapTopLeft = _rocketMapPosition - new Vector2(RenderWidth / 2, RenderHeight / 2);
+        _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(RenderWidth, RenderHeight));
 
         _tileOffset = new Vector2(_viewPortMapTopLeft.X % TileWidth, _viewPortMapTopLeft.Y % TileHeight);       // Tile offset adjusts the tile-map to keep things smooth.
 
@@ -143,7 +150,6 @@ public class SmokeGame : Game
         smokeDelta += new Vector2(deltaX * rocketHalfHeight, deltaY * rocketHalfHeight);
 
         _smokeEmitterMapPosition = _rocketMapPosition - smokeDelta;
-        _smokeEmitterScreenPosition = _rocketScreenPosition - smokeDelta;
 
         // Emit Smoke
         foreach (var smoke in _smokeParticles)
@@ -159,7 +165,7 @@ public class SmokeGame : Game
 
     protected override void Draw(GameTime gameTime)
     {
-        _scale = 1f / (720f / GraphicsDevice.Viewport.Height);
+        _scale = 1f / (((float)RenderHeight) / GraphicsDevice.Viewport.Height);
         GraphicsDevice.SetRenderTarget(_renderTarget);
         GraphicsDevice.Clear(Color.Black);
         
