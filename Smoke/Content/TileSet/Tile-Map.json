@@ -25,7 +25,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "Wall-Bottom.png",
+	"filename": "Wall-Bottom-Right.png",
 	"frame": {"x":96,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -33,7 +33,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "Wall-Right.png",
+	"filename": "Wall-Bottom.png",
 	"frame": {"x":128,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -41,7 +41,7 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "Wall-Top-Right.png",
+	"filename": "Wall-Right.png",
 	"frame": {"x":160,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
@@ -49,8 +49,16 @@
 	"sourceSize": {"w":32,"h":32}
 },
 {
-	"filename": "Wall.png",
+	"filename": "Wall-Top-Right.png",
 	"frame": {"x":192,"y":0,"w":32,"h":32},
+	"rotated": false,
+	"trimmed": false,
+	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
+	"sourceSize": {"w":32,"h":32}
+},
+{
+	"filename": "Wall.png",
+	"frame": {"x":224,"y":0,"w":32,"h":32},
 	"rotated": false,
 	"trimmed": false,
 	"spriteSourceSize": {"x":0,"y":0,"w":32,"h":32},
@@ -59,10 +67,10 @@
 "meta": {
 	"app": "https://www.codeandweb.com/texturepacker",
 	"version": "1.0",
-	"image": "Tiles-TexturePacker-Export.png",
+	"image": "Tile-Map.png",
 	"format": "RGBA8888",
-	"size": {"w":224,"h":32},
+	"size": {"w":256,"h":32},
 	"scale": "1",
-	"smartupdate": "$TexturePacker:SmartUpdate:179ac7a5f807a5d63819a8cd284c34a2:0f84306d68fad5d867aec4cff7164e45:1da4ce4bd00c68c027011561d2fcd16c$"
+	"smartupdate": "$TexturePacker:SmartUpdate:3eed5cd1a1b7fe1b1eec8c44d56f0e93:2999174438442d0066687ecc154247db:eb8a635481ab7522e3c225c7f3f891ba$"
 }
 }

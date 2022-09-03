@@ -13,6 +13,10 @@
 Rules:
 /   if (0, -1) is floor & (1, 0) is floor then (1, 0) is /
 
+    *..
+    *#.
+    ***
+
 
 >	if (0, -1) is wall & (1, 0) is floor then (1, 0) is >
 

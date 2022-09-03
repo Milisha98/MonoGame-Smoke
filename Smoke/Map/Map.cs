@@ -76,7 +76,11 @@ public class Map
 
                     // Right Wall
                     if (matrix.IsMatch(_patternShadowRight)) _shadows.Add((x + 1, y), _tileSet.Get("Wall-Right"));
-                    else if(matrix.IsMatch(_patternShadowBottom)) _shadows.Add((x, y + 1), _tileSet.Get("Wall-Bottom"));
+                    if (matrix.IsMatch(_patternShadowTopRight)) _shadows.Add((x + 1, y), _tileSet.Get("Wall-Top-Right"));
+                    if (matrix.IsMatch(_patternShadowBottom)) _shadows.Add((x, y + 1), _tileSet.Get("Wall-Bottom"));
+                    if (matrix.IsMatch(_patternShadowBottomLeft)) _shadows.Add((x, y + 1), _tileSet.Get("Wall-Bottom-Left"));
+                    if (matrix.IsMatch(_patternShadowBottomRight)) _shadows.Add((x + 1, y + 1), _tileSet.Get("Wall-Bottom-Right"));
+                    if (matrix.IsMatch(_patternShadowBottomCorner)) _shadows.Add((x + 1, y), _tileSet.Get("Wall-Bottom-Right-Corner"));
                 }
             }
         }
@@ -324,10 +328,30 @@ public class Map
 *#.
 ***".Replace("\r\n", "").Trim();
 
+    private string _patternShadowTopRight = @"
+*..
+*#.
+***".Replace("\r\n", "").Trim();
+
     private string _patternShadowBottom = @"
 ***
 ##*
 ..*".Replace("\r\n", "").Trim();
+
+    private string _patternShadowBottomLeft = @"
+***
+.#*
+..*".Replace("\r\n", "").Trim();
+
+    private string _patternShadowBottomCorner = @"
+**#
+*#.
+***".Replace("\r\n", "").Trim();
+
+    private string _patternShadowBottomRight = @"
+***
+*#.
+*..".Replace("\r\n", "").Trim();
 
     #endregion
 }
