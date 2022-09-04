@@ -23,6 +23,8 @@ public class Map
         _tileSet = tileSet;
         Load(_background, _backgroundRaw);
         Load(_foreground, _foregroundRaw);
+
+        CollisionPoints = GetCollisionPoints().ToList();
         InferShadows();
     }
 
@@ -86,6 +88,22 @@ public class Map
         }
     }
 
+    private IEnumerable<Rectangle> GetCollisionPoints()
+    {
+        foreach (var wall in _foreground.ToList())
+        {
+            if (wall.Value is not null)
+            {
+                yield return new Rectangle(wall.Key.Item1 * TileWidth,
+                                           wall.Key.Item2 * TileWidth,
+                                           TileWidth,
+                                           TileHeight);
+            }
+        }
+    }
+
+
+
     private void Draw(SpriteBatch _spriteBatch,
                       Dictionary<(int, int), SpriteFrame?> dictionary,
                       int minX,
@@ -116,6 +134,7 @@ public class Map
 
     public int Rows { get; set; } = 0;
     public int Columns { get; set; } = 0;
+    public List<Rectangle> CollisionPoints { get; init; }
 
     #region Raw
 

@@ -5,14 +5,31 @@ using Microsoft.Xna.Framework.Input;
 using Smoke.Core;
 using Smoke.Sprites;
 using System;
-using System.Net.Sockets;
+using System.Collections.Generic;
+using System.Linq;
 
 namespace Smoke.GameObjects;
 
 internal class Rocket : IMonoGame
 {
-    const string RocketTextureName = "Rocket-Wireframe";
+    const string RocketTextureName = "Rocket";
     const string ShadowTextureName = "Rocket-Shadow";
+
+    public Rocket()
+    {
+        // Define Collision Points
+        _relativeCollisionPoints = new List<Vector2>
+        {
+            new (11, 0),
+            new (16, 22),
+            new (23, 64),
+            new (23, 120),
+            new (6, 123),
+            new (0, 116),
+            new (0, 64),
+            new (6, 21)
+        };
+    }
 
     //
     // Methods
@@ -55,10 +72,29 @@ internal class Rocket : IMonoGame
         }
 
         // Move the absolute position
-        var deltaX = (float)Math.Sin(Angle);
-        var deltaY = (float)-Math.Cos(Angle);
-        AngleVector = new Vector2(deltaX, deltaY);
+        var sinTheta = (float)Math.Sin(Angle);
+        var cosTheta = (float)Math.Cos(Angle);
+        AngleVector = new Vector2(sinTheta, -cosTheta);
         MapPosition += (AngleVector * Velocity);
+
+
+        // Set the Collision Points
+        var centerAdjustment = (RocketSprite.Size - (RocketSprite.Size * Scale)) / 2;   // Because of scaling, we need to re-center
+        var scaledVectors = _relativeCollisionPoints
+                                .Select(vector => new Vector2                                       // Rotate
+                                {
+                                    X = cosTheta * (vector.X - Middle.X) -
+                                        sinTheta * (vector.Y - Middle.Y) + Middle.X,
+                                    Y = sinTheta * (vector.X - Middle.X) +
+                                        cosTheta * (vector.Y - Middle.Y) + Middle.Y
+                                })
+                                .Select(vector => vector * Scale)                                   // Scale
+                                .Select(vector => vector + MapPosition + centerAdjustment);         // Align Middle
+
+
+
+        CollisionPoints = scaledVectors.Select(vector => new Rectangle(vector.ToPoint(), new Point(1, 1))).ToList();
+
     }
 
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
@@ -97,13 +133,29 @@ internal class Rocket : IMonoGame
     public float Handling { get; set; } = MathHelper.ToRadians(1);
     public float Angle { get; set; } = 0;
     public float Scale { get; set; } = 0.7f;
-    
     public Vector2 AngleVector { get; set; } = Vector2.Zero;
+
+    public Rectangle ClaytonsCollisionRectangle
+    {
+        get
+        {
+            var height = RocketSprite.Size.Y * Scale;
+            var size = new Vector2(height, height);
+            var location = new Vector2(MapPosition.X - (height / 2) + (Width / 2), MapPosition.Y - (height / 2) + (Height / 2));
+            return new Rectangle(location.ToPoint(), size.ToPoint());
+        }
+    }
+
+    private List<Vector2> _relativeCollisionPoints;
+    public List<Rectangle> CollisionPoints { get; set; } = new();
+
+
+
 
     // Calculated
     public int Width { get => (int)RocketSprite.Size.X; }
     public int Height { get => (int)RocketSprite.Size.Y; }
     public Vector2 CurrentVector { get => AngleVector * Velocity; }
-    public Vector2 Middle() => RocketSprite.Texture.Middle();
+    public Vector2 Middle { get => RocketSprite.Texture.Middle(); }
 
 }

@@ -32,7 +32,7 @@
 /processorParam:TextureFormat=Color
 /build:Rocket-Shadow.png
 
-#begin Rocket-Wireframe.png
+#begin Rocket.png
 /importer:TextureImporter
 /processor:TextureProcessor
 /processorParam:ColorKeyColor=255,0,255,255
@@ -42,7 +42,7 @@
 /processorParam:ResizeToPowerOfTwo=False
 /processorParam:MakeSquare=False
 /processorParam:TextureFormat=Color
-/build:Rocket-Wireframe.png
+/build:Rocket.png
 
 #begin Smoke.png
 /importer:TextureImporter

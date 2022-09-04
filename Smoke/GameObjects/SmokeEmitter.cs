@@ -44,7 +44,7 @@ internal class SmokeEmitter : IMonoGame
         float delta = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
         // Smoke Emitter
-        Vector2 rocketMiddle = this.Middle() - _rocket.Middle();               // Update the Position
+        Vector2 rocketMiddle = this.Middle - _rocket.Middle;               // Update the Position
         var smokeDelta = _rocket.AngleVector * (_rocket.Height / 2);
         MapPosition = _rocket.MapPosition - rocketMiddle - smokeDelta;
 
@@ -95,7 +95,7 @@ internal class SmokeEmitter : IMonoGame
 
     public Vector2 MapPosition { get; set; }
 
-    public Vector2 Middle() => SmokeSprite.Texture.Middle();
+    public Vector2 Middle { get => SmokeSprite.Texture.Middle(); }
 
     public Rectangle ViewPort { get; set; }
 
@@ -105,7 +105,7 @@ internal class SmokeEmitter : IMonoGame
         if (ViewPort.Contains(mapPosition))
         {
             var viewPortTopLeft = new Vector2(ViewPort.X, ViewPort.Y);
-            return mapPosition - viewPortTopLeft - _rocket.Middle();
+            return mapPosition - viewPortTopLeft - _rocket.Middle;
         }
         return null;
     }

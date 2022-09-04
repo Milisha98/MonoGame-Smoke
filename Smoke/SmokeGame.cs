@@ -1,9 +1,13 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Smoke.Core;
 using Smoke.GameObjects;
 using Smoke.Sprites;
 using System;
+using System.Collections.Generic;
+using System.Linq;
+using System.Net.Http.Headers;
 
 namespace Smoke;
 
@@ -41,8 +45,10 @@ public class SmokeGame : Game
     private Rectangle _viewPort;
 
     // Debugging    
-    private SpriteFont _debugText;
     private bool _break = false;
+    private SpriteFont _debugText;
+    private Texture2D _debugRectangle;
+
 
 
     public SmokeGame()
@@ -90,7 +96,8 @@ public class SmokeGame : Game
         _smoke.LoadContent(Content);
 
         _debugText = Content.Load<SpriteFont>("Text");
-
+        _debugRectangle = new Texture2D(GraphicsDevice, 1, 1);
+        _debugRectangle.SetData(new Color[] { Color.White });
     }
 
 
@@ -114,6 +121,12 @@ public class SmokeGame : Game
         UpdateCamera();
         UpdateSmoke(gameTime);
 
+        bool collide = CheckCollisions();
+        if (collide)
+        {
+            _break = true;
+        }
+
         base.Update(gameTime);
     }
 
@@ -131,9 +144,10 @@ public class SmokeGame : Game
 
         // Draw the background
         DrawTiles();
+        DrawDebug();
         DrawRocket(gameTime);
         DrawSmoke(gameTime);
-        DrawDebugText();
+
 
         _spriteBatch.End();
 
@@ -141,6 +155,38 @@ public class SmokeGame : Game
 
         base.Draw(gameTime);
     }
+
+    #region Collisions
+
+     private bool CheckCollisions()
+    {
+        List<Rectangle> collisionPoints = ClaytonsCollisionCheck();
+        if (collisionPoints.Any() == false) return false;
+
+        // Now, lets be more fine grained and check Rocket Collision Points 
+        foreach (var point in collisionPoints)
+        {
+            if (_rocket.CollisionPoints.Any(x => x.Intersects(point)))
+            {
+                return true;
+            }
+        }
+        return false;
+    }
+
+    private List<Rectangle> ClaytonsCollisionCheck()
+    {
+        // Do a generous check
+        var rocketRectangle = _rocket.ClaytonsCollisionRectangle;
+
+        // Get Tiles that Intersect
+        var collisionPoints = _mapData.CollisionPoints
+                                      .Where(tile => rocketRectangle.Intersects(tile))
+                                      .ToList();
+        return collisionPoints;
+    }
+
+    #endregion
 
     #region Update Methods
 
@@ -182,8 +228,21 @@ public class SmokeGame : Game
         _spriteBatch.End();
     }
 
-    private void DrawDebugText()
+    private void DrawDebug()
     {
+
+        DrawClaytonsCollisionRectangle();
+
+        foreach (var r in _rocket.CollisionPoints)
+        {
+            var screenRectangle = MapPositionToScreenPosition(r.Location.ToVector2());
+            if (screenRectangle is not null)
+            {
+                _spriteBatch.Draw(_debugRectangle, screenRectangle.Value, Color.Red);
+            }
+        }
+
+        
         // Debug
         //        string debugText = $@"
         //Rocket Map Pos:         {_rocket.MapPosition - _rocket.Middle()}
@@ -210,6 +269,24 @@ public class SmokeGame : Game
     private void DrawTiles()
     {
         _mapData.DrawMap(_spriteBatch, _viewPort, _tileOffset);
+    }
+
+    private Vector2? MapPositionToScreenPosition(Vector2 mapPosition)
+    {
+        if (_viewPort.Contains(mapPosition))
+        {
+            return mapPosition - _viewPortMapTopLeft - _rocket.Middle;
+        }
+        return null;
+    }
+
+    private void DrawClaytonsCollisionRectangle()
+    {
+        var rect = _rocket.ClaytonsCollisionRectangle;
+        var origin = MapPositionToScreenPosition(new Vector2(rect.X, rect.Y));
+        if (origin == null) return;
+        var screenRectangle = new Rectangle(origin.Value.ToPoint(), new Point(rect.Width, rect.Height));
+        _spriteBatch.Draw(_debugRectangle, screenRectangle, Color.Beige);
     }
 
     #endregion
