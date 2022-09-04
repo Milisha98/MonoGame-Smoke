@@ -17,8 +17,8 @@ public class SmokeGame : Game
 
     const int RenderWidth = 1280;
     const int RenderHeight = 720;
-    //const int RenderWidth = 1600;
-    //const int RenderHeight = 900;
+    //const int RenderWidth = 1920;
+    //const int RenderHeight = 1080;
 
 
     const int TileWidth = 32, TileHeight = 32;
