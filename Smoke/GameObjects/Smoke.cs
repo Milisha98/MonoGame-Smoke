@@ -5,7 +5,7 @@ using System.Linq;
 using System.Text;
 using System.Threading.Tasks;
 
-namespace Smoke;
+namespace Smoke.GameObjects;
 
 internal class Smoke
 {
@@ -15,7 +15,7 @@ internal class Smoke
 
         MapPosition = position;
         MaxDecay = 200;
-        Scale = (float)((rnd.NextDouble() * 0.25) + 0.1);
+        Scale = (float)(rnd.NextDouble() * 0.25 + 0.1);
 
         float velocity = (float)rnd.NextDouble();
         Angle = MathHelper.ToRadians(rnd.Next(0, 359));
@@ -26,10 +26,10 @@ internal class Smoke
         Tint = rnd.Next(200, 255);
     }
 
-    public void Update()
+    public void Update(float delta)
     {
         if (Decay < MaxDecay) Decay++;
-        MapPosition += Movement;
+        MapPosition += Movement * (delta / 1000);
     }
 
     // IDecaying

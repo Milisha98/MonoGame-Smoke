@@ -15,15 +15,11 @@ namespace Smoke.Sprites;
 public class TexturePackLoader
 {
     private readonly ContentManager _contentManager;
-	public TexturePackLoader(ContentManager contentManager)
-	{
-		_contentManager = contentManager;
-	}
 
-	public SpriteSheet Load(string imageResource)
+	public SpriteSheet LoadContent(ContentManager contentManager, string imageResource)
 	{
-        var texture = _contentManager.Load<Texture2D>(imageResource);
-        var dataFile = Path.Combine(_contentManager.RootDirectory, Path.ChangeExtension(imageResource, "json"));
+        var texture = contentManager.Load<Texture2D>(imageResource);
+        var dataFile = Path.Combine(contentManager.RootDirectory, Path.ChangeExtension(imageResource, "json"));
 
         var raw =  System.IO.File.ReadAllText(dataFile);
         var json = JsonConvert.DeserializeObject<dynamic>(raw);
