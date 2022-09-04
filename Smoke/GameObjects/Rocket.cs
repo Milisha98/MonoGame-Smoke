@@ -5,13 +5,14 @@ using Microsoft.Xna.Framework.Input;
 using Smoke.Core;
 using Smoke.Sprites;
 using System;
+using System.Net.Sockets;
 
 namespace Smoke.GameObjects;
 
 internal class Rocket : IMonoGame
 {
-    const string TextureName = "Rocket-Wireframe";
-    const string SmokeTextureName = "Rocket-Shadow";
+    const string RocketTextureName = "Rocket-Wireframe";
+    const string ShadowTextureName = "Rocket-Shadow";
 
     //
     // Methods
@@ -19,18 +20,17 @@ internal class Rocket : IMonoGame
     public void LoadContent(ContentManager contentManager)
     {
         // Load the Rocket
-        Texture2D rocketTexture = contentManager.Load<Texture2D>(TextureName);
-        RocketSprite = new SpriteFrame(TextureName,
+        Texture2D rocketTexture = contentManager.Load<Texture2D>(RocketTextureName);
+        RocketSprite = new SpriteFrame(RocketTextureName,
                                       rocketTexture,
                                       rocketTexture.Bounds,
                                       new Vector2(rocketTexture.Bounds.Width, rocketTexture.Bounds.Height));
 
-        Texture2D smokeTexture = contentManager.Load<Texture2D>(SmokeTextureName);
-        ShadowSprite = new SpriteFrame(TextureName,
+        Texture2D smokeTexture = contentManager.Load<Texture2D>(ShadowTextureName);
+        ShadowSprite = new SpriteFrame(RocketTextureName,
                                       smokeTexture,
                                       smokeTexture.Bounds,
                                       new Vector2(smokeTexture.Bounds.Width, smokeTexture.Bounds.Height));
-
     }
 
     public void Update(GameTime gameTime)
@@ -60,6 +60,7 @@ internal class Rocket : IMonoGame
         AngleVector = new Vector2(deltaX, deltaY);
         MapPosition += (AngleVector * Velocity);
     }
+
     public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
     {
         // Draw the Rocket

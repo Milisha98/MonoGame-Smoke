@@ -1,12 +1,9 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
-using Smoke.Core;
 using Smoke.GameObjects;
 using Smoke.Sprites;
 using System;
-using System.Collections.Generic;
-using System.Linq;
 
 namespace Smoke;
 
@@ -35,14 +32,11 @@ public class SmokeGame : Game
     private SpriteSheet _tileSet;
     private Vector2 _tileOffset;
 
-    // Rocket
-    private GameObjects.Rocket _rocket = new();
+    // Game Objects
+    private Rocket _rocket = new();
+    private SmokeEmitter _smoke;
 
-    // Smoke
-    private Texture2D _smoke;
-    private Vector2 _smokeEmitterMapPosition;
-    private List<GameObjects.Smoke> _smokeParticles = new();
-
+    // View Port
     private Vector2 _viewPortMapTopLeft;
     private Rectangle _viewPort;
 
@@ -68,9 +62,15 @@ public class SmokeGame : Game
         TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 60.0);
         IsFixedTimeStep = true;
 
+        // Smoke Emitter needs knowledge of the rocket
+        _smoke = new(_rocket);
+
         base.Initialize();
     }
 
+    //
+    // Load Content
+    //
     protected override void LoadContent()
     {
         // Game
@@ -86,18 +86,21 @@ public class SmokeGame : Game
         _rocket.ScreenPosition = new Vector2((RenderWidth / 2) - (_rocket.Width / 2), (RenderHeight / 2) - (_rocket.Height / 2));
         _rocket.MapPosition = new Vector2((_mapData.Rows / 2) * TileWidth, (_mapData.Columns / 2) * TileHeight);
 
-        // Smoke
-        _smoke = Content.Load<Texture2D>("Smoke");
+        // Smoke Emitter
+        _smoke.LoadContent(Content);
 
         _debugText = Content.Load<SpriteFont>("Text");
 
     }
 
+
+    //
+    // Update
+    //
     protected override void Update(GameTime gameTime)
     {
         var keyboardState = Keyboard.GetState();
         var controller1 = GamePad.GetState(PlayerIndex.One);
-        float delta = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
         if (controller1.Buttons.Back == ButtonState.Pressed ||
             keyboardState.IsKeyDown(Keys.Escape))
@@ -107,34 +110,16 @@ public class SmokeGame : Game
         if (keyboardState.IsKeyDown(Keys.OemTilde)) _break = _break == false;
         if (_break) return;
 
-        _rocket.Update(gameTime);
-
-        _viewPortMapTopLeft = _rocket.MapPosition - new Vector2(RenderWidth / 2, RenderHeight / 2);
-        _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(RenderWidth, RenderHeight));
-
-        _tileOffset = new Vector2(_viewPortMapTopLeft.X % TileWidth, _viewPortMapTopLeft.Y % TileHeight);       // Tile offset adjusts the tile-map to keep things smooth.
-
-
-        // Everything after this is just nice to have
-        if (gameTime.IsRunningSlowly) return;
-
-        // Smoke Emitter position
-        Vector2 rocketMiddle = _smoke.Middle(_rocket.RocketSprite.Texture);
-        var smokeDelta = _rocket.AngleVector * (_rocket.Height / 2);
-        _smokeEmitterMapPosition = (_rocket.MapPosition - rocketMiddle) - smokeDelta;
-
-        // Emit Smoke
-        foreach (var smoke in _smokeParticles)
-        {
-            smoke.Update(delta);
-            smoke.ScreenPosition = MapPositionToScreenPosition(smoke.MapPosition);
-        }
-        _smokeParticles.RemoveAll(x => x.MarkedForDestroy);
-        _smokeParticles.Add(new GameObjects.Smoke(_smokeEmitterMapPosition));
+        UpdateRocket(gameTime);
+        UpdateCamera();
+        UpdateSmoke(gameTime);
 
         base.Update(gameTime);
     }
 
+    //
+    // Draw
+    //
     protected override void Draw(GameTime gameTime)
     {
         _scale = 1f / (((float)RenderHeight) / GraphicsDevice.Viewport.Height);
@@ -147,7 +132,7 @@ public class SmokeGame : Game
         // Draw the background
         DrawTiles();
         DrawRocket(gameTime);
-        DrawSmoke();
+        DrawSmoke(gameTime);
         DrawDebugText();
 
         _spriteBatch.End();
@@ -156,6 +141,33 @@ public class SmokeGame : Game
 
         base.Draw(gameTime);
     }
+
+    #region Update Methods
+
+    private void UpdateSmoke(GameTime gameTime)
+    {
+        // Update Smoke
+        _smoke.ViewPort = _viewPort;
+        _smoke.Update(gameTime);
+    }
+
+    private void UpdateRocket(GameTime gameTime)
+    {
+        // Update the Rocket
+        _rocket.Update(gameTime);
+    }
+
+    private void UpdateCamera()
+    {
+        // Update the ViewPort (Camera)
+        _viewPortMapTopLeft = _rocket.MapPosition - new Vector2(RenderWidth / 2, RenderHeight / 2);
+        _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(RenderWidth, RenderHeight));
+
+        // Offset the Tiles for the Camera
+        _tileOffset = new Vector2(_viewPortMapTopLeft.X % TileWidth, _viewPortMapTopLeft.Y % TileHeight);       // Tile offset adjusts the tile-map to keep things smooth.
+    }
+
+    #endregion
 
     #region Draw Methods
 
@@ -184,16 +196,9 @@ public class SmokeGame : Game
         //        _spriteBatch.DrawString(_debugText, debugText, new Vector2(0, 0), Color.White);
     }
 
-    private void DrawSmoke()
+    private void DrawSmoke(GameTime gameTime)
     {
-        // Draw the Smoke      
-        foreach (var smoke in _smokeParticles)
-        {
-            if (smoke.ScreenPosition is not null)
-            {
-                DrawRotatedAndScale(_spriteBatch, _smoke, smoke.ScreenPosition.Value, smoke.Angle, smoke.Scale * 0.8f, smoke.TintColor);
-            }
-        }
+        _smoke.Draw(_spriteBatch, gameTime);
     }
 
     private void DrawRocket(GameTime gameTime)
@@ -206,26 +211,6 @@ public class SmokeGame : Game
     {
         _mapData.DrawMap(_spriteBatch, _viewPort, _tileOffset);
     }
-
-    private void DrawRotatedAndScale(SpriteBatch spriteBatch, Texture2D texture, Vector2 position, float angle, float scale, Color color)
-    {
-        var origin = new Vector2(texture.Width / 2, texture.Height / 2);
-        var rectangle = new Rectangle(0, 0, texture.Width, texture.Height);
-        var newPostion = position + origin;
-
-        spriteBatch.Draw(texture, newPostion, rectangle, color, angle, origin, scale, SpriteEffects.None, 1);
-
-    }
-
-    private Vector2? MapPositionToScreenPosition(Vector2 mapPosition)
-    {
-        if (_viewPort.Contains(mapPosition))
-        {
-            return mapPosition - _viewPortMapTopLeft - _rocket.Middle();
-        }
-        return null;
-    }
-
 
     #endregion
 }

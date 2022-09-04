@@ -11,9 +11,11 @@ https://web.archive.org/web/20191208231225/https://wildbunny.co.uk/blog/2011/12/
 . Rotated rectangle - AABB box
 	(i.e. find the 4 points)
 
-Then I can consider a more refined collision technique:
-	- Pixel based (XOR)
+Then I can consider a more refined collision technique:	
 	- Point Based (ala https://www.codeandweb.com/physicseditor)
+	  I think this would be easiest. I can create 1px rectangles on key points around the missile.
+	  Tiles already have squares.
+	  And I can simply do an Intersect check.
 
 
 More research:

@@ -16,4 +16,5 @@ internal static class Helper
     internal static Vector2 Middle(this Texture2D t1, Texture2D t2) =>
         new Vector2(t1.Width / 2, t1.Height / 2) -
         new Vector2(t2.Width / 2, t2.Height / 2);
+
 }
