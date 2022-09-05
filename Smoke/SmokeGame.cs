@@ -30,7 +30,7 @@ public class SmokeGame : Game
 
     // Tiles
     private TexturePackLoader _tileSetLoader = new();
-    private Map.Map _mapData;
+    private Map _mapData;
     private SpriteSheet _tileSet;
 
     // Game Objects
@@ -84,7 +84,7 @@ public class SmokeGame : Game
 
         // Tiles
         _tileSet = _tileSetLoader.LoadContent(Content, "TileSet/Tile-Map");
-        _mapData = new Map.Map(_tileSet);
+        _mapData = new Map(_tileSet);
 
         // Rocket
         _rocket.LoadContent(Content);
