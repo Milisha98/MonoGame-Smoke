@@ -6,5 +6,5 @@ https://youtu.be/39wG9zA90wI
 
 
 TODO:
-	-  Explosions
-	
+	x  Explosions
+	-  Smoke Emitter for the Explosion

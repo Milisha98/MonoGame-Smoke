@@ -29,7 +29,7 @@ internal class Smoke
     public void Update(float delta)
     {
         if (Decay < MaxDecay) Decay++;
-        MapPosition += Movement * (delta / 1000);
+        MapPosition += Movement * (delta / 100);
     }
 
     // IDecaying

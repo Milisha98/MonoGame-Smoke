@@ -52,6 +52,8 @@ internal class Rocket : IMonoGame
 
     public void Update(GameTime gameTime)
     {
+        if (IsVisible == false) return;
+
         var keyboardState = Keyboard.GetState();
         float delta = (float)gameTime.ElapsedGameTime.TotalMilliseconds;
 
@@ -97,8 +99,10 @@ internal class Rocket : IMonoGame
 
     }
 
-    public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    public void Draw(SpriteBatch spriteBatch, GameTime gameTime, Rectangle viewport)
     {
+        if (IsVisible == false) return;
+
         // Draw the Rocket
         var shadowOffset = new Vector2(25, 50);
         DrawFrame(spriteBatch, ShadowSprite, shadowOffset);
@@ -134,6 +138,7 @@ internal class Rocket : IMonoGame
     public float Angle { get; set; } = 0;
     public float Scale { get; set; } = 0.7f;
     public Vector2 AngleVector { get; set; } = Vector2.Zero;
+    public bool IsVisible { get; set; } = true;
 
     public Rectangle ClaytonsCollisionRectangle
     {

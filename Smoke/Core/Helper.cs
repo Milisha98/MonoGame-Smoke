@@ -41,4 +41,10 @@ internal static class Helper
                  cosTheta * (pointToRotate.Y - centerPoint.Value.Y) + centerPoint.Value.Y)
         };
     }
+
+    internal static Vector2 MapPositionToScreenPosition(this Vector2 mapPosition, Rectangle viewPort)
+    {
+        var viewPortMapTopLeft = viewPort.Location.ToVector2();
+        return mapPosition - viewPortMapTopLeft - Global.RocketMiddle;
+    }
 }

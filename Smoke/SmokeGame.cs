@@ -1,6 +1,7 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
 using Microsoft.Xna.Framework.Input;
+using Smoke.Core;
 using Smoke.GameObjects;
 using Smoke.Sprites;
 using System;
@@ -36,6 +37,7 @@ public class SmokeGame : Game
     // Game Objects
     private Rocket _rocket = new();
     private SmokeEmitter _smoke;
+    private Explosion _explosion;
 
     // View Port
     private Vector2 _viewPortMapTopLeft;
@@ -94,6 +96,11 @@ public class SmokeGame : Game
         // Smoke Emitter
         _smoke.LoadContent(Content);
 
+        // Explosion
+        _explosion = new Explosion();
+        _explosion.LoadContent(Content);
+
+        // Debug
         _debugText = Content.Load<SpriteFont>("Text");
         _debugRectangle = new Texture2D(GraphicsDevice, 1, 1);
         _debugRectangle.SetData(new Color[] { Color.White });
@@ -125,8 +132,12 @@ public class SmokeGame : Game
         if (collisionPoint.HasValue)
         {
             _collisionPoint = collisionPoint;
-            _break = true;
+            _explosion.MapPosition = _collisionPoint.Value;
+            _explosion.Start();
+            _rocket.IsVisible = false;
         }
+
+        UpdateExplosion(gameTime);
 
         base.Update(gameTime);
     }
@@ -148,7 +159,7 @@ public class SmokeGame : Game
         DrawDebug();
         DrawRocket(gameTime);
         DrawSmoke(gameTime);
-
+        DrawExplosion(gameTime);
 
         _spriteBatch.End();
 
@@ -195,7 +206,6 @@ public class SmokeGame : Game
     private void UpdateSmoke(GameTime gameTime)
     {
         // Update Smoke
-        _smoke.ViewPort = _viewPort;
         _smoke.Update(gameTime);
     }
 
@@ -211,6 +221,9 @@ public class SmokeGame : Game
         _viewPortMapTopLeft = _rocket.MapPosition - new Vector2(RenderWidth / 2, RenderHeight / 2);
         _viewPort = new Rectangle(_viewPortMapTopLeft.ToPoint(), new Point(RenderWidth, RenderHeight));
     }
+
+    private void UpdateExplosion(GameTime gameTime) => _explosion.Update(gameTime);
+
 
     #endregion
 
@@ -246,37 +259,19 @@ public class SmokeGame : Game
         //        _spriteBatch.DrawString(_debugText, debugText, new Vector2(0, 0), Color.White);
     }
 
-    private void DrawSmoke(GameTime gameTime)
-    {
-        _smoke.Draw(_spriteBatch, gameTime);
-    }
+    private void DrawSmoke(GameTime gameTime) => _smoke.Draw(_spriteBatch, gameTime, _viewPort);
+    
+    private void DrawRocket(GameTime gameTime) => _rocket.Draw(_spriteBatch, gameTime, _viewPort);
+    
+    private void DrawTiles() => _mapData.DrawMap(_spriteBatch, _viewPort);
 
-    private void DrawRocket(GameTime gameTime)
-    {
-        _rocket.Draw(_spriteBatch, gameTime);
-    }
-
-
-    private void DrawTiles()
-    {
-        _mapData.DrawMap(_spriteBatch, _viewPort);
-    }
-
-    private Vector2? MapPositionToScreenPosition(Vector2 mapPosition)
-    {
-        if (_viewPort.Contains(mapPosition))
-        {
-            return mapPosition - _viewPortMapTopLeft - _rocket.Middle;
-        }
-        return null;
-    }
+    private void DrawExplosion(GameTime gameTime) => _explosion.Draw(_spriteBatch, gameTime, _viewPort);
 
     private void DrawClaytonsCollisionRectangle()
     {
         var rect = _rocket.ClaytonsCollisionRectangle;
-        var origin = MapPositionToScreenPosition(new Vector2(rect.X, rect.Y));
-        if (origin == null) return;
-        var screenRectangle = new Rectangle(origin.Value.ToPoint(), new Point(rect.Width, rect.Height));
+        var origin = new Vector2(rect.X, rect.Y).MapPositionToScreenPosition(_viewPort);
+        var screenRectangle = new Rectangle(origin.ToPoint(), new Point(rect.Width, rect.Height));
         _spriteBatch.Draw(_debugRectangle, screenRectangle, Color.Beige);
     }
 
@@ -284,12 +279,9 @@ public class SmokeGame : Game
     {
         foreach (var r in _collisionTiles)
         {
-            var tilePos = MapPositionToScreenPosition(r.Location.ToVector2());
-            if (tilePos.HasValue)
-            {
-                var screenRectangle = new Rectangle(tilePos.Value.ToPoint(), new Point(32, 32));
-                _spriteBatch.Draw(_debugRectangle, screenRectangle, Color.Blue);
-            }
+            var tilePos = r.Location.ToVector2().MapPositionToScreenPosition(_viewPort);
+            var screenRectangle = new Rectangle(tilePos.ToPoint(), new Point(32, 32));
+            _spriteBatch.Draw(_debugRectangle, screenRectangle, Color.Blue);
 
         }
     }
@@ -298,11 +290,8 @@ public class SmokeGame : Game
     {
         foreach (var r in _rocket.CollisionPoints)
         {
-            var screenRectangle = MapPositionToScreenPosition(r.Location.ToVector2());
-            if (screenRectangle is not null)
-            {
-                _spriteBatch.Draw(_debugRectangle, screenRectangle.Value, Color.Red);
-            }
+            var screenRectangle = r.Location.ToVector2().MapPositionToScreenPosition(_viewPort);
+            _spriteBatch.Draw(_debugRectangle, screenRectangle, Color.Red);
         }
     }
 
@@ -310,11 +299,8 @@ public class SmokeGame : Game
     {
         if (_collisionPoint.HasValue)
         {
-            var screenRectangle = MapPositionToScreenPosition(_collisionPoint.Value);
-            if (screenRectangle is not null)
-            {
-                _spriteBatch.Draw(_debugRectangle, screenRectangle.Value, Color.Red);
-            }
+            var screenRectangle = _collisionPoint.Value.MapPositionToScreenPosition(_viewPort);
+            _spriteBatch.Draw(_debugRectangle, screenRectangle, Color.Red);
         }
     }
 

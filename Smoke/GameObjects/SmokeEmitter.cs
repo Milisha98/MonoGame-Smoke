@@ -51,14 +51,13 @@ internal class SmokeEmitter : IMonoGame
         // Emit Smoke
         foreach (var smoke in _smokeParticles)
         {
-            smoke.ScreenPosition = MapPositionToScreenPosition(smoke.MapPosition);
             smoke.Update(delta);            
         }
         _smokeParticles.RemoveAll(x => x.MarkedForDestroy);
-        _smokeParticles.Add(new Smoke(MapPosition));
+        if (_rocket.IsVisible) _smokeParticles.Add(new Smoke(MapPosition));
     }
 
-    public void Draw(SpriteBatch spriteBatch, GameTime gameTime)
+    public void Draw(SpriteBatch spriteBatch, GameTime gameTime, Rectangle viewport)
     {
         // Smoke is just special effects. Not essential
         if (gameTime.IsRunningSlowly) return;
@@ -66,6 +65,7 @@ internal class SmokeEmitter : IMonoGame
         // Draw the Smoke      
         foreach (var smoke in _smokeParticles)
         {
+            smoke.ScreenPosition = smoke.MapPosition.MapPositionToScreenPosition(viewport);
             if (smoke.ScreenPosition is not null)
             {
                 DrawFrame(spriteBatch, smoke);
@@ -97,16 +97,4 @@ internal class SmokeEmitter : IMonoGame
 
     public Vector2 Middle { get => SmokeSprite.Texture.Middle(); }
 
-    public Rectangle ViewPort { get; set; }
-
-
-    private Vector2? MapPositionToScreenPosition(Vector2 mapPosition)
-    {
-        if (ViewPort.Contains(mapPosition))
-        {
-            var viewPortTopLeft = new Vector2(ViewPort.X, ViewPort.Y);
-            return mapPosition - viewPortTopLeft - _rocket.Middle;
-        }
-        return null;
-    }
 }

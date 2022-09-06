@@ -1,5 +1,6 @@
 ﻿using Microsoft.Xna.Framework;
 using Microsoft.Xna.Framework.Graphics;
+using Smoke.Core;
 using Smoke.Sprites;
 using System;
 using System.Collections.Generic;
@@ -109,7 +110,7 @@ public class Map
         foreach (var key in dictionary.Keys.ToList())
         {
             var mapPos = TilePosToMapPos(key.Item1, key.Item2);
-            var screenPos = MapPositionToScreenPosition(mapPos, viewPort);
+            var screenPos = mapPos.MapPositionToScreenPosition(viewPort);
 
             var tile = dictionary.GetValueOrDefault(key.Item1, key.Item2);
             {
@@ -126,13 +127,6 @@ public class Map
 
     private Rectangle TilePosToMapRectangle(int x, int y) =>
         new Rectangle(TilePosToMapPos(x, y).ToPoint(), TileSize);
-
-    private Vector2 MapPositionToScreenPosition(Vector2 mapPosition, Rectangle viewPort)
-    {
-        Vector2 rocketMiddle = new Vector2(12, 62);
-        var viewPortMapTopLeft = viewPort.Location.ToVector2();
-        return mapPosition - viewPortMapTopLeft - rocketMiddle;
-    }
 
     #endregion
 
