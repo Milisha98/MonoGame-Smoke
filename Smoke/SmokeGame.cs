@@ -64,7 +64,7 @@ public class SmokeGame : Game
     protected override void Initialize()
     {
         // Ensure that the game speed is fixed at 60FPS
-        TargetElapsedTime = TimeSpan.FromSeconds(1.0 / 60.0);
+        TargetElapsedTime = TimeSpan.FromSeconds(1.0 / Global.FPS);
         IsFixedTimeStep = true;
 
         // Smoke Emitter needs knowledge of the rocket
